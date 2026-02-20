@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainQuest AI — Padhai Nahi, Adventure Hai Yeh!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0a1a;
+    --card: #1a1530;
+    --card2: #221d3a;
+    --purple: #7c3aed;
+    --purple-light: #a78bfa;
+    --pink: #ec4899;
+    --cyan: #06b6d4;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #f1f0ff;
+    --muted: #8b7fa8;
+    --border: rgba(124,58,237,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated starfield */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 5%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 50%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 90%, rgba(255,255,255,0.4) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+
+  /* Screens */
+  .screen {
+    display: none;
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  .screen.active { display: block; }
+
+  /* Splash Screen */
+  #splash {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.4) 0%, transparent 70%),
+                radial-gradient(ellipse at 80% 80%, rgba(236,72,153,0.2) 0%, transparent 60%);
+  }
+  #splash.active { display: flex; }
+
+  .splash-logo {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(245,158,11,0.8), 0 0 40px rgba(245,158,11,0.4);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .splash-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 48px;
+    line-height: 1;
+    background: linear-gradient(135deg, #a78bfa, #ec4899, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .splash-tagline {
+    font-size: 13px;
+    color: var(--purple-light);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 40px;
+  }
+
+  .mascot {
+    font-size: 80px;
+    margin-bottom: 24px;
+    animation: bounce 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(124,58,237,0.6));
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-6px) rotate(1deg); }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(245,158,11,0.8); }
+    50% { text-shadow: 0 0 40px rgba(245,158,11,1), 0 0 80px rgba(245,158,11,0.5); }
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.3px;
+  }
+  .btn:active { transform: scale(0.96); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: white;
+    padding: 16px 32px;
+    font-size: 18px;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(124,58,237,0.5), 0 0 0 3px rgba(124,58,237,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .btn-secondary {
+    background: var(--card2);
+    color: var(--purple-light);
+    padding: 12px 24px;
+    font-size: 15px;
+    border: 2px solid var(--border);
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    padding: 10px 20px;
+    font-size: 14px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+  }
+
+  /* Header */
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0 20px;
+  }
+
+  .logo-small {
+    font-family: 'Fredoka One', cursive;
+    font-size: 22px;
+    background: linear-gradient(135deg, #a78bfa, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  /* Player Card */
+  .player-card {
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .player-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .player-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+    border: 3px solid rgba(167,139,250,0.5);
+    flex-shrink: 0;
+  }
+
+  .player-details h2 {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 2px;
+  }
+
+  .player-details .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, var(--gold), #f97316);
+    color: var(--bg);
+    border-radius: 8px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .xp-bar {
+    margin-top: 8px;
+  }
+  .xp-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .xp-track {
+    height: 10px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    border-radius: 10px;
+    width: 68%;
+    box-shadow: 0 0 8px rgba(124,58,237,0.6);
+    animation: xp-glow 2s ease-in-out infinite;
+  }
+  @keyframes xp-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(124,58,237,0.6); }
+    50% { box-shadow: 0 0 16px rgba(236,72,153,0.8); }
+  }
+
+  .daily-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .daily-stat {
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 10px 6px;
+  }
+  .daily-stat .ds-icon { font-size: 18px; margin-bottom: 4px; }
+  .daily-stat .ds-value { font-size: 16px; font-weight: 900; color: var(--text); }
+  .daily-stat .ds-label { font-size: 9px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+
+  /* Section Headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .see-all {
+    font-size: 12px;
+    color: var(--purple-light);
+    font-weight: 700;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+
+  /* World Cards */
+  .worlds-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .world-card {
+    border-radius: 20px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid transparent;
+  }
+  .world-card:hover { transform: translateY(-2px); }
+  .world-card:active { transform: scale(0.97); }
+
+  .world-card.science {
+    background: linear-gradient(135deg, #064e3b, #065f46);
+    border-color: rgba(16,185,129,0.4);
+  }
+  .world-card.history {
+    background: linear-gradient(135deg, #78350f, #92400e);
+    border-color: rgba(245,158,11,0.4);
+  }
+  .world-card.english {
+    background: linear-gradient(135deg, #1e3a5f, #1e40af);
+    border-color: rgba(59,130,246,0.4);
+  }
+  .world-card.maths {
+    background: linear-gradient(135deg, #4c1d95, #5b21b6);
+    border-color: rgba(124,58,237,0.4);
+    opacity: 0.6;
+  }
+
+  .world-icon { font-size: 36px; margin-bottom: 8px; }
+  .world-name { font-size: 14px; font-weight: 900; margin-bottom: 4px; }
+  .world-progress { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+
+  .world-prog-bar {
+    height: 5px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .world-prog-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.7);
+  }
+
+  .world-lock {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  /* Quests */
+  .quests-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+  .quest-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .quest-item:hover { border-color: var(--purple); }
+
+  .quest-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .quest-icon.q1 { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+  .quest-icon.q2 { background: linear-gradient(135deg, #059669, #34d399); }
+  .quest-icon.q3 { background: linear-gradient(135deg, #d97706, #fbbf24); }
+
+  .quest-info { flex: 1; }
+  .quest-name { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
+  .quest-desc { font-size: 11px; color: var(--muted); }
+  .quest-prog {
+    margin-top: 6px;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .quest-prog-fill { height: 100%; border-radius: 4px; }
+  .quest-prog-fill.p1 { width: 66%; background: var(--purple); }
+  .quest-prog-fill.p2 { width: 40%; background: var(--green); }
+  .quest-prog-fill.p3 { width: 80%; background: var(--gold); }
+
+  .quest-reward {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--gold);
+  }
+
+  /* Lives */
+  .lives-display {
+    display: flex;
+    gap: 6px;
+  }
+  .life { font-size: 16px; }
+  .life.empty { filter: grayscale(1); opacity: 0.3; }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 420px;
+    background: rgba(13,10,26,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0 16px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+    padding: 4px 12px;
+    border-radius: 12px;
+  }
+  .nav-btn .nav-icon { font-size: 22px; }
+  .nav-btn.active { color: var(--purple-light); }
+  .nav-btn.active .nav-icon { filter: drop-shadow(0 0 6px rgba(167,139,250,0.8)); }
+
+  .nav-center-btn {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border-radius: 20px;
+    padding: 10px 16px;
+    color: white;
+    font-size: 9px;
+  }
+  .nav-center-btn .nav-icon { font-size: 26px; }
+
+  /* Level screen */
+  .level-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-top: 12px;
+  }
+  .back-btn {
+    width: 40px;
+    height: 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .chapter-title { font-size: 20px; font-weight: 900; }
+  .chapter-sub { font-size: 12px; color: var(--muted); }
+
+  /* Levels list */
+  .levels-container {
+    position: relative;
+    padding-bottom: 100px;
+  }
+
+  .levels-path {
+    position: relative;
+  }
+
+  .level-node {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .level-node:nth-child(odd) { justify-content: flex-start; padding-left: 20px; }
+  .level-node:nth-child(even) { justify-content: flex-end; padding-right: 20px; }
+
+  .level-node::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--purple), rgba(124,58,237,0.1));
+    top: 40px;
+    z-index: 0;
+  }
+  .level-node:last-child::before { display: none; }
+
+  .level-bubble {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.2s;
+    border: 3px solid transparent;
+  }
+  .level-bubble:active { transform: scale(0.93); }
+
+  .level-bubble.completed {
+    background: linear-gradient(135deg, #059669, #10b981);
+    border-color: rgba(16,185,129,0.5);
+    box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+  }
+  .level-bubble.current {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border-color: var(--purple-light);
+    box-shadow: 0 4px 20px rgba(124,58,237,0.6), 0 0 0 6px rgba(124,58,237,0.15);
+    animation: pulse-level 2s ease-in-out infinite;
+  }
+  .level-bubble.locked {
+    background: var(--card2);
+    border-color: rgba(255,255,255,0.08);
+    cursor: not-allowed;
+  }
+
+  @keyframes pulse-level {
+    0%, 100% { box-shadow: 0 4px 20px rgba(124,58,237,0.6), 0 0 0 6px rgba(124,58,237,0.15); }
+    50% { box-shadow: 0 4px 30px rgba(236,72,153,0.6), 0 0 0 10px rgba(124,58,237,0.1); }
+  }
+
+  .level-num { font-family: 'Fredoka One', cursive; font-size: 22px; }
+  .level-stars { font-size: 10px; letter-spacing: 1px; }
+
+  .level-card {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    max-width: 200px;
+  }
+  .level-node:nth-child(odd) .level-card { margin-left: 12px; }
+  .level-node:nth-child(even) .level-card { margin-right: 12px; }
+
+  .level-card h3 { font-size: 13px; font-weight: 900; margin-bottom: 4px; }
+  .level-card p { font-size: 11px; color: var(--muted); }
+
+  /* Quiz screen */
+  .quiz-container { padding-top: 12px; padding-bottom: 100px; }
+
+  .quiz-progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  .qp-dot {
+    flex: 1;
+    height: 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.08);
+  }
+  .qp-dot.done { background: var(--green); }
+  .qp-dot.active { background: var(--purple); animation: qp-pulse 1s ease-in-out infinite; }
+  @keyframes qp-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .quiz-lives { display: flex; gap: 4px; }
+
+  .timer-ring {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: conic-gradient(var(--purple) 216deg, rgba(255,255,255,0.08) 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    position: relative;
+  }
+  .timer-ring::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: var(--bg);
+  }
+  .timer-ring span { position: relative; z-index: 1; }
+
+  .tutor-card {
+    background: linear-gradient(135deg, var(--card), var(--card2));
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .tutor-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .tutor-bubble {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.9);
+  }
+  .tutor-bubble strong { color: var(--purple-light); }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .question-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .question-text { font-size: 17px; font-weight: 800; line-height: 1.5; }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .option-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 12px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .option-btn:hover { border-color: var(--purple); background: rgba(124,58,237,0.1); }
+  .option-btn.correct { border-color: var(--green); background: rgba(16,185,129,0.15); }
+  .option-btn.wrong { border-color: var(--red); background: rgba(239,68,68,0.15); }
+
+  .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    background: rgba(124,58,237,0.3);
+    font-size: 11px;
+    font-weight: 900;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .hint-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245,158,11,0.1);
+    border: 1px dashed rgba(245,158,11,0.4);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  /* Streak banner */
+  .streak-banner {
+    background: linear-gradient(135deg, #7c2d12, #b45309);
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .streak-fire { font-size: 32px; animation: fire 0.6s ease-in-out infinite alternate; }
+  @keyframes fire { 0% { transform: scale(1) rotate(-2deg); } 100% { transform: scale(1.1) rotate(2deg); } }
+  .streak-info h3 { font-size: 14px; font-weight: 900; color: var(--gold); }
+  .streak-info p { font-size: 11px; color: rgba(255,255,255,0.7); }
+
+  /* Leaderboard */
+  .lb-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 4px;
+  }
+  .lb-tab {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .lb-tab.active {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: white;
+  }
+
+  .lb-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .lb-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .lb-item.me {
+    border-color: rgba(167,139,250,0.5);
+    background: rgba(124,58,237,0.1);
+  }
+
+  .lb-rank {
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .lb-rank.gold { color: var(--gold); }
+  .lb-rank.silver { color: #d1d5db; }
+  .lb-rank.bronze { color: #a16207; }
+
+  .lb-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    background: var(--card2);
+  }
+
+  .lb-info { flex: 1; }
+  .lb-name { font-size: 14px; font-weight: 900; }
+  .lb-level { font-size: 11px; color: var(--muted); }
+
+  .lb-score { font-family: 'Fredoka One', cursive; font-size: 18px; color: var(--purple-light); }
+
+  /* Result */
+  .result-screen {
+    text-align: center;
+    padding: 40px 20px 100px;
+  }
+  .result-emoji { font-size: 80px; margin-bottom: 16px; animation: result-pop 0.5s ease-out; }
+  @keyframes result-pop {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .result-title { font-family: 'Fredoka One', cursive; font-size: 36px; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--gold), #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .result-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+
+  .stars-display { display: flex; justify-content: center; gap: 8px; margin-bottom: 28px; }
+  .star-result {
+    font-size: 48px;
+    filter: grayscale(1);
+    opacity: 0.3;
+    transition: all 0.3s ease;
+  }
+  .star-result.earned { filter: none; opacity: 1; animation: star-pop 0.4s ease-out; }
+  @keyframes star-pop { 0% { transform: scale(0) rotate(-20deg); } 80% { transform: scale(1.3) rotate(5deg); } 100% { transform: scale(1); } }
+
+  .result-rewards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .reward-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 8px;
+    text-align: center;
+  }
+  .reward-icon { font-size: 24px; margin-bottom: 4px; }
+  .reward-value { font-size: 18px; font-weight: 900; color: var(--gold); }
+  .reward-label { font-size: 10px; color: var(--muted); font-weight: 700; }
+
+  /* Notifications badge */
+  .notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    background: var(--red);
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg);
+  }
+
+  /* Scrollable */
+  .scroll-content { padding-bottom: 90px; }
+
+  /* Coin anim */
+  @keyframes coin-fly {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-60px) scale(0.5); opacity: 0; }
+  }
+
+  .floating-coin {
+    position: fixed;
+    font-size: 24px;
+    animation: coin-fly 0.8s ease-out forwards;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* AI bubble */
+  .ai-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    align-items: flex-end;
+    padding: 16px;
+  }
+  .ai-overlay.active { display: flex; }
+
+  .ai-panel {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid rgba(167,139,250,0.4);
+    border-radius: 24px;
+    padding: 24px;
+    animation: slide-up 0.3s ease-out;
+  }
+  @keyframes slide-up {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .ai-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .ai-title { font-size: 18px; font-weight: 900; }
+  .ai-close {
+    margin-left: auto;
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    background: var(--card2);
+    border: none;
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .ai-explanation {
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .ai-modes {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .ai-mode-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .ai-mode-btn.active {
+    background: rgba(124,58,237,0.2);
+    border-color: var(--purple);
+    color: var(--purple-light);
+  }
+
+  .ai-explain-text {
+    background: rgba(255,255,255,0.03);
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Confetti particles */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    pointer-events: none;
+    z-index: 500;
+    overflow: hidden;
+    height: 100vh;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confetti-fall 2s ease-out forwards;
+    opacity: 0;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div class="screen active" id="splash">
+  <div class="mascot">🧠</div>
+  <div class="splash-logo">BRAINQUEST</div>
+  <div class="splash-title">BrainQuest AI</div>
+  <div class="splash-tagline">⚡ Padhai Nahi — Adventure Hai Yeh! ⚡</div>
+  
+  <div style="width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px;">
+    <button class="btn btn-primary" onclick="navigate('home')">
+      🎮 Chalo Khelein!
+    </button>
+    <button class="btn btn-secondary" onclick="navigate('home')">
+      👤 Login / Signup
+    </button>
+  </div>
+
+  <div style="display:flex; gap:24px; margin-top:40px; color:var(--muted); font-size:12px; font-weight:700;">
+    <span>🏫 CBSE Ready</span>
+    <span>🤖 AI Powered</span>
+    <span>🎮 100% Fun</span>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div class="screen" id="home">
+  <div class="game-header">
+    <div class="logo-small">BrainQuest AI</div>
+    <div class="stats-bar">
+      <div class="stat-pill">🔥 <span>14</span></div>
+      <div class="stat-pill">💰 <span>2,840</span></div>
+      <div class="lives-display" style="background:var(--card); border:1px solid var(--border); border-radius:20px; padding:6px 10px;">
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+        <span class="life empty">❤️</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-content">
+    <!-- Player Card -->
+    <div class="player-card">
+      <div class="player-info">
+        <div class="avatar">⚔️</div>
+        <div class="player-details">
+          <h2>Aryan Kumar</h2>
+          <div class="level-badge">⭐ Level 23 Scholar</div>
+        </div>
+        <div style="margin-left:auto; text-align:right;">
+          <div style="font-size:11px; color:var(--muted); font-weight:700;">Class</div>
+          <div style="font-size:20px; font-weight:900; font-family:'Fredoka One',cursive;">9th</div>
+        </div>
+      </div>
+      <div class="xp-bar">
+        <div class="xp-label"><span>⚡ XP Progress</span><span>3,400 / 5,000</span></div>
+        <div class="xp-track"><div class="xp-fill"></div></div>
+      </div>
+      <div class="daily-stats">
+        <div class="daily-stat">
+          <div class="ds-icon">🔥</div>
+          <div class="ds-value">14</div>
+          <div class="ds-label">Streak</div>
+        </div>
+        <div class="daily-stat">
+          <div class="ds-icon">⭐</div>
+          <div class="ds-value">186</div>
+          <div class="ds-label">Stars</div>
+        </div>
+        <div class="daily-stat">
+          <div class="ds-icon">🏆</div>
+          <div class="ds-value">#47</div>
+          <div class="ds-label">Rank</div>
+        </div>
+        <div class="daily-stat">
+          <div class="ds-icon">✅</div>
+          <div class="ds-value">62%</div>
+          <div class="ds-label">Done</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streak Banner -->
+    <div class="streak-banner">
+      <div class="streak-fire">🔥</div>
+      <div class="streak-info">
+        <h3>14-Day Streak! Zabardast! 🎉</h3>
+        <p>Aaj bhi kheloge? 30-day streak badge bahut kareeb hai!</p>
+      </div>
+      <button class="btn btn-outline" onclick="navigate('quiz')" style="flex-shrink:0; font-size:11px;">Go!</button>
+    </div>
+
+    <!-- Worlds -->
+    <div class="section-header">
+      <div class="section-title">🌍 World Map</div>
+      <button class="see-all">Sab Dekho →</button>
+    </div>
+
+    <div class="worlds-grid">
+      <div class="world-card science" onclick="navigate('levels')">
+        <div class="world-icon">🔬</div>
+        <div class="world-name">Science World</div>
+        <div class="world-progress">8 / 14 Chapters</div>
+        <div class="world-prog-bar"><div class="world-prog-fill" style="width:57%"></div></div>
+      </div>
+      <div class="world-card history" onclick="navigate('levels')">
+        <div class="world-icon">🏛️</div>
+        <div class="world-name">History Quest</div>
+        <div class="world-progress">5 / 12 Chapters</div>
+        <div class="world-prog-bar"><div class="world-prog-fill" style="width:41%"></div></div>
+      </div>
+      <div class="world-card english" onclick="navigate('levels')">
+        <div class="world-icon">📖</div>
+        <div class="world-name">English Kingdom</div>
+        <div class="world-progress">3 / 10 Chapters</div>
+        <div class="world-prog-bar"><div class="world-prog-fill" style="width:30%"></div></div>
+      </div>
+      <div class="world-card maths">
+        <div class="world-lock">🔒</div>
+        <div class="world-icon" style="opacity:0.5;">📐</div>
+        <div class="world-name" style="opacity:0.5;">Maths Dungeon</div>
+        <div class="world-progress" style="opacity:0.5;">Coming Soon</div>
+        <div class="world-prog-bar"><div class="world-prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Daily Quests -->
+    <div class="section-header">
+      <div class="section-title">⚡ Daily Quests</div>
+      <span style="font-size:11px; color:var(--muted);">Resets in 5h 23m</span>
+    </div>
+
+    <div class="quests-list">
+      <div class="quest-item" onclick="navigate('quiz')">
+        <div class="quest-icon q1">🎯</div>
+        <div class="quest-info">
+          <div class="quest-name">Complete 2 Levels</div>
+          <div class="quest-desc">Koi bhi subject mein 2 levels complete karo</div>
+          <div class="quest-prog"><div class="quest-prog-fill p1"></div></div>
+        </div>
+        <div class="quest-reward">+🏅 50<br><span style="font-size:9px; color:var(--muted);">2/3 done</span></div>
+      </div>
+      <div class="quest-item" onclick="navigate('quiz')">
+        <div class="quest-icon q2">🌿</div>
+        <div class="quest-info">
+          <div class="quest-name">Science Champion</div>
+          <div class="quest-desc">Science mein perfect score lo</div>
+          <div class="quest-prog"><div class="quest-prog-fill p2"></div></div>
+        </div>
+        <div class="quest-reward">+🏅 75<br><span style="font-size:9px; color:var(--muted);">Not done</span></div>
+      </div>
+      <div class="quest-item" onclick="navigate('quiz')">
+        <div class="quest-icon q3">⚡</div>
+        <div class="quest-info">
+          <div class="quest-name">Speed Run</div>
+          <div class="quest-desc">Koi level 2 minute mein complete karo</div>
+          <div class="quest-prog"><div class="quest-prog-fill p3"></div></div>
+        </div>
+        <div class="quest-reward">+🏅 100<br><span style="font-size:9px; color:var(--muted); font-weight:900; color:var(--green);">Almost!</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEVELS SCREEN -->
+<div class="screen" id="levels">
+  <div class="level-header">
+    <div class="back-btn" onclick="navigate('home')">←</div>
+    <div>
+      <div class="chapter-title">🔬 Science World</div>
+      <div class="chapter-sub">Chapter 3: Chemical Reactions</div>
+    </div>
+    <div class="stat-pill">💰 2,840</div>
+  </div>
+
+  <div class="levels-container">
+    <div class="levels-path">
+
+      <div class="level-node">
+        <div class="level-bubble completed" onclick="showResult()">
+          <div class="level-num">1</div>
+          <div class="level-stars">⭐⭐⭐</div>
+        </div>
+        <div class="level-card">
+          <h3>What is a Reaction?</h3>
+          <p>Reactants, products aur basics</p>
+        </div>
+      </div>
+
+      <div class="level-node">
+        <div class="level-card" style="text-align:right;">
+          <h3>Types of Reactions</h3>
+          <p>Combination, decomposition, displacement</p>
+        </div>
+        <div class="level-bubble completed" onclick="showResult()">
+          <div class="level-num">2</div>
+          <div class="level-stars">⭐⭐⭐</div>
+        </div>
+      </div>
+
+      <div class="level-node">
+        <div class="level-bubble current" onclick="navigate('quiz')">
+          <div class="level-num">3</div>
+          <div class="level-stars">▷ PLAY</div>
+        </div>
+        <div class="level-card">
+          <h3>Exothermic vs Endothermic</h3>
+          <p>Energy changes in reactions</p>
+        </div>
+      </div>
+
+      <div class="level-node">
+        <div class="level-card" style="text-align:right; opacity:0.5;">
+          <h3>Oxidation & Reduction</h3>
+          <p>Redox reactions ka concept</p>
+        </div>
+        <div class="level-bubble locked">
+          <div class="level-num" style="opacity:0.4;">4</div>
+          <div style="font-size:18px;">🔒</div>
+        </div>
+      </div>
+
+      <div class="level-node">
+        <div class="level-bubble locked">
+          <div class="level-num" style="opacity:0.4;">5</div>
+          <div style="font-size:18px;">🔒</div>
+        </div>
+        <div class="level-card" style="opacity:0.5;">
+          <h3>Boss Level: Lab Challenge</h3>
+          <p>Chemical reactions ka full test</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="navigate('home')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-btn active"><span class="nav-icon">🗺️</span>Worlds</button>
+    <button class="nav-btn nav-center-btn" onclick="navigate('quiz')"><span class="nav-icon">▶️</span>Play</button>
+    <button class="nav-btn" onclick="navigate('leaderboard')"><span class="nav-icon">🏆</span>Ranks</button>
+    <button class="nav-btn" onclick="navigate('home')" style="position:relative;"><span class="nav-icon">👤</span>Profile<div class="notif-badge">3</div></button>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div class="screen" id="quiz">
+  <div class="quiz-container">
+    <!-- Progress -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+      <div class="back-btn" onclick="navigate('levels')">←</div>
+      <div style="flex:1;">
+        <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:6px;">Level 3 • Question 2/5</div>
+        <div class="quiz-progress">
+          <div class="qp-dot done"></div>
+          <div class="qp-dot active"></div>
+          <div class="qp-dot"></div>
+          <div class="qp-dot"></div>
+          <div class="qp-dot"></div>
+        </div>
+      </div>
+      <div class="timer-ring"><span>18</span></div>
+    </div>
+
+    <div class="quiz-meta">
+      <div class="quiz-lives">
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+        <span class="life empty">❤️</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" style="padding:6px 12px; font-size:11px;">⚡ 50-50</button>
+        <button class="btn btn-outline" style="padding:6px 12px; font-size:11px;">⏸ Freeze</button>
+      </div>
+    </div>
+
+    <!-- AI Tutor Explanation -->
+    <div class="tutor-card">
+      <div class="tutor-avatar">🤖</div>
+      <div class="tutor-bubble">
+        <strong>Arjun bhai:</strong> Yaar, exothermic reactions mein <strong>energy release</strong> hoti hai — jaise burning wood ya body ka digestion. Endothermic mein <strong>energy absorb</strong> hoti hai, jaise photosynthesis! ✨
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-card">
+      <div class="question-label">📝 Question 2 of 5</div>
+      <div class="question-text">Khana pakane mein kaun si reaction hoti hai jahan energy release hoti hai?</div>
+    </div>
+
+    <!-- Options -->
+    <div class="options-grid">
+      <button class="option-btn" onclick="selectAnswer(this, false)">
+        <span class="option-letter">A</span>
+        Endothermic — kyunki khana absorb karta hai heat
+      </button>
+      <button class="option-btn" onclick="selectAnswer(this, true)">
+        <span class="option-letter">B</span>
+        Exothermic — energy release hoti hai burning se
+      </button>
+      <button class="option-btn" onclick="selectAnswer(this, false)">
+        <span class="option-letter">C</span>
+        Photosynthesis reaction — sunlight se khana
+      </button>
+      <button class="option-btn" onclick="selectAnswer(this, false)">
+        <span class="option-letter">D</span>
+        Decomposition — compounds break hote hain
+      </button>
+    </div>
+
+    <!-- Hint -->
+    <button class="hint-btn" onclick="showAIHelp()">
+      💡 "Samajh nahi aaya" — AI se poochho! (50 coins)
+    </button>
+
+  </div>
+
+  <!-- Nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="navigate('home')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-btn" onclick="navigate('levels')"><span class="nav-icon">🗺️</span>Worlds</button>
+    <button class="nav-btn nav-center-btn active"><span class="nav-icon">▶️</span>Play</button>
+    <button class="nav-btn" onclick="navigate('leaderboard')"><span class="nav-icon">🏆</span>Ranks</button>
+    <button class="nav-btn"><span class="nav-icon">👤</span>Profile</button>
+  </div>
+</div>
+
+<!-- LEADERBOARD SCREEN -->
+<div class="screen" id="leaderboard">
+  <div class="level-header">
+    <div class="back-btn" onclick="navigate('home')">←</div>
+    <div>
+      <div class="chapter-title">🏆 Leaderboard</div>
+      <div class="chapter-sub">Weekly Reset — 2 din baki</div>
+    </div>
+  </div>
+
+  <div class="lb-tabs">
+    <button class="lb-tab active">🏫 School</button>
+    <button class="lb-tab" onclick="switchTab(this)">🌆 City</button>
+    <button class="lb-tab" onclick="switchTab(this)">🌏 India</button>
+  </div>
+
+  <div class="lb-list" style="padding-bottom:90px;">
+    <div class="lb-item">
+      <div class="lb-rank gold">1</div>
+      <div class="lb-avatar">🦁</div>
+      <div class="lb-info">
+        <div class="lb-name">Priya Sharma</div>
+        <div class="lb-level">Level 31 • Science Master</div>
+      </div>
+      <div class="lb-score">9,240</div>
+    </div>
+    <div class="lb-item">
+      <div class="lb-rank silver">2</div>
+      <div class="lb-avatar">🐯</div>
+      <div class="lb-info">
+        <div class="lb-name">Rahul Verma</div>
+        <div class="lb-level">Level 28 • History Hunter</div>
+      </div>
+      <div class="lb-score">8,650</div>
+    </div>
+    <div class="lb-item">
+      <div class="lb-rank bronze">3</div>
+      <div class="lb-avatar">🦊</div>
+      <div class="lb-info">
+        <div class="lb-name">Sneha Patel</div>
+        <div class="lb-level">Level 26 • Word Wizard</div>
+      </div>
+      <div class="lb-score">7,890</div>
+    </div>
+    <div class="lb-item" style="opacity:0.7;">
+      <div class="lb-rank" style="color:var(--muted);">4</div>
+      <div class="lb-avatar">🐺</div>
+      <div class="lb-info">
+        <div class="lb-name">Amit Singh</div>
+        <div class="lb-level">Level 25</div>
+      </div>
+      <div class="lb-score">6,420</div>
+    </div>
+    <div class="lb-item" style="opacity:0.7;">
+      <div class="lb-rank" style="color:var(--muted);">5</div>
+      <div class="lb-avatar">🦅</div>
+      <div class="lb-info">
+        <div class="lb-name">Kavya Reddy</div>
+        <div class="lb-level">Level 24</div>
+      </div>
+      <div class="lb-score">5,910</div>
+    </div>
+    <div style="text-align:center; padding:16px 0; color:var(--muted); font-size:12px; font-weight:700;">— — —</div>
+    <div class="lb-item me">
+      <div class="lb-rank" style="color:var(--purple-light);">47</div>
+      <div class="lb-avatar">⚔️</div>
+      <div class="lb-info">
+        <div class="lb-name">Aryan Kumar (You)</div>
+        <div class="lb-level">Level 23 • 14🔥 Streak</div>
+      </div>
+      <div class="lb-score">2,840</div>
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn btn-primary" onclick="navigate('quiz')" style="font-size:14px; padding:14px 24px;">
+        🚀 Top 10 mein jaana hai? Abhi khelo!
+      </button>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="navigate('home')"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-btn" onclick="navigate('levels')"><span class="nav-icon">🗺️</span>Worlds</button>
+    <button class="nav-btn nav-center-btn" onclick="navigate('quiz')"><span class="nav-icon">▶️</span>Play</button>
+    <button class="nav-btn active"><span class="nav-icon">🏆</span>Ranks</button>
+    <button class="nav-btn"><span class="nav-icon">👤</span>Profile</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div class="screen" id="result">
+  <div class="result-screen">
+    <div class="result-emoji">🎉</div>
+    <div class="result-title">Level Complete!</div>
+    <div class="result-sub">Ekdum zabardast! Tum bahut tez ho yaar 🔥</div>
+
+    <div class="stars-display">
+      <div class="star-result earned" style="animation-delay:0.2s;">⭐</div>
+      <div class="star-result earned" style="animation-delay:0.4s;">⭐</div>
+      <div class="star-result earned" style="animation-delay:0.6s;">⭐</div>
+    </div>
+
+    <div class="result-rewards">
+      <div class="reward-item">
+        <div class="reward-icon">💰</div>
+        <div class="reward-value">+150</div>
+        <div class="reward-label">Coins</div>
+      </div>
+      <div class="reward-item">
+        <div class="reward-icon">⚡</div>
+        <div class="reward-value">+200</div>
+        <div class="reward-label">XP</div>
+      </div>
+      <div class="reward-item">
+        <div class="reward-icon">🔥</div>
+        <div class="reward-value">15!</div>
+        <div class="reward-label">Streak</div>
+      </div>
+    </div>
+
+    <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:16px; padding:16px; margin-bottom:24px; text-align:left;">
+      <div style="font-size:12px; font-weight:900; color:var(--green); margin-bottom:8px;">✅ Tumhare strong topics:</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.7);">Exothermic reactions, Energy classification, Real-life applications</div>
+    </div>
+
+    <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:16px; padding:16px; margin-bottom:24px; text-align:left;">
+      <div style="font-size:12px; font-weight:900; color:var(--gold); margin-bottom:8px;">⚠️ Arjun bhai ki tip:</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.7);">Endothermic reactions pe thoda aur practice karo — next level mein yahi aayega!</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="navigate('levels')">
+      ➡️ Next Level Unlock Karo!
+    </button>
+    <br><br>
+    <button class="btn btn-secondary" onclick="navigate('home')" style="margin-top:8px;">
+      🏠 Home Jao
+    </button>
+  </div>
+</div>
+
+<!-- AI HELP OVERLAY -->
+<div class="ai-overlay" id="aiOverlay">
+  <div class="ai-panel" style="max-width:390px;">
+    <div class="ai-header">
+      <div class="tutor-avatar" style="width:44px;height:44px;font-size:22px;">🤖</div>
+      <div class="ai-title">Arjun Bhai Explain Karta Hai</div>
+      <button class="ai-close" onclick="closeAI()">✕</button>
+    </div>
+    <div class="ai-modes">
+      <button class="ai-mode-btn active" onclick="switchMode(this, 0)">📝 Simple</button>
+      <button class="ai-mode-btn" onclick="switchMode(this, 1)">🎨 Visual</button>
+      <button class="ai-mode-btn" onclick="switchMode(this, 2)">🏠 Example</button>
+    </div>
+    <div class="ai-explain-text" id="aiExplainText">
+      <strong>Exothermic = Energy <em>Release</em> 🔥</strong><br><br>
+      Socho jab tum gas stove jalate ho — gas burn hoti hai aur <strong>heat nikalta hai</strong>. Yeh heat/energy jo bahar nikalti hai, iska matlab hai <em>exothermic reaction</em>.<br><br>
+      Formula yaad karo: <strong>Exo = Exit</strong> (energy exits/nikalta hai!)
+    </div>
+    <button class="btn btn-secondary" onclick="switchExplain()">🔄 Aur differently explain karo</button>
+  </div>
+</div>
+
+<!-- Confetti container -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<!-- Bottom Nav for home -->
+<div class="bottom-nav" id="homeNav" style="display:none;">
+  <button class="nav-btn active"><span class="nav-icon">🏠</span>Home</button>
+  <button class="nav-btn" onclick="navigate('levels')"><span class="nav-icon">🗺️</span>Worlds</button>
+  <button class="nav-btn nav-center-btn" onclick="navigate('quiz')"><span class="nav-icon">▶️</span>Play</button>
+  <button class="nav-btn" onclick="navigate('leaderboard')"><span class="nav-icon">🏆</span>Ranks</button>
+  <button class="nav-btn" style="position:relative;"><span class="nav-icon">👤</span>Profile<div class="notif-badge">3</div></button>
+</div>
+
+<script>
+let currentScreen = 'splash';
+const aiExplanations = [
+  `<strong>Exothermic = Energy <em>Release</em> 🔥</strong><br><br>Socho jab tum gas stove jalate ho — gas burn hoti hai aur <strong>heat nikalta hai</strong>. Yeh heat/energy jo bahar nikalti hai, iska matlab hai <em>exothermic reaction</em>.<br><br>Formula yaad karo: <strong>Exo = Exit</strong> (energy exits/nikalta hai!)`,
+  `<strong>Visual Trick: Energy Diagram 📊</strong><br><br>Ek hill socho:<br>🔝 Reactants (upar hain)<br>⬇️ Products (neeche hain)<br><br>Reactants se Products mein jaane par jo extra energy hai — woh <strong>heat ke roop mein nikalta hai</strong>. Isliye temperature badh'ta hai!<br><br>📉 Products ka energy level < Reactants = Exothermic!`,
+  `<strong>Real Life mein Dekho 🏠</strong><br><br>✅ Roti pakana → exothermic<br>✅ Diya jalana → exothermic  <br>✅ Body mein glucose burn → exothermic (isliye body garam rehti hai!)<br><br>❌ Photosynthesis → endothermic (sunlight absorb karta hai)<br>❌ Ice melting → endothermic (heat absorb hoti hai)<br><br>Trick: <strong>Agar garam lage — exo! Agar thanda lage — endo!</strong>`
+];
+let explainIndex = 0;
+
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screen).classList.add('active');
+  
+  const homeNav = document.getElementById('homeNav');
+  homeNav.style.display = screen === 'home' ? 'flex' : 'none';
+  
+  currentScreen = screen;
+  window.scrollTo(0, 0);
+}
+
+function selectAnswer(btn, correct) {
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.style.pointerEvents = 'none');
+  
+  if (correct) {
+    btn.classList.add('correct');
+    spawnCoins(btn);
+    setTimeout(() => {
+      navigate('result');
+      spawnConfetti();
+    }, 800);
+  } else {
+    btn.classList.add('wrong');
+    // Find and highlight correct
+    allBtns.forEach(b => {
+      if (b !== btn) {
+        setTimeout(() => { if(!b.classList.contains('wrong')) b.classList.add('correct'); }, 400);
+      }
+    });
+  }
+}
+
+function spawnCoins(btn) {
+  for (let i = 0; i < 5; i++) {
+    const coin = document.createElement('div');
+    coin.className = 'floating-coin';
+    coin.textContent = '💰';
+    coin.style.left = (Math.random() * 80 + 10) + 'vw';
+    coin.style.top = '40vh';
+    coin.style.animationDelay = (i * 0.1) + 's';
+    document.body.appendChild(coin);
+    setTimeout(() => coin.remove(), 1200);
+  }
+}
+
+function spawnConfetti() {
+  const colors = ['#7c3aed','#ec4899','#f59e0b','#10b981','#06b6d4','#a78bfa'];
+  const container = document.getElementById('confettiContainer');
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.8 + 's';
+    piece.style.animationDuration = (1.5 + Math.random()) + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 3000);
+  }
+}
+
+function showResult() {
+  navigate('result');
+  spawnConfetti();
+}
+
+function showAIHelp() {
+  document.getElementById('aiOverlay').classList.add('active');
+}
+
+function closeAI() {
+  document.getElementById('aiOverlay').classList.remove('active');
+  explainIndex = 0;
+  document.querySelectorAll('.ai-mode-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.getElementById('aiExplainText').innerHTML = aiExplanations[0];
+}
+
+function switchMode(btn, idx) {
+  document.querySelectorAll('.ai-mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  explainIndex = idx;
+  document.getElementById('aiExplainText').innerHTML = aiExplanations[idx];
+}
+
+function switchExplain() {
+  explainIndex = (explainIndex + 1) % aiExplanations.length;
+  document.getElementById('aiExplainText').innerHTML = aiExplanations[explainIndex];
+  document.querySelectorAll('.ai-mode-btn').forEach((b,i) => b.classList.toggle('active', i === explainIndex));
+}
+
+function switchTab(btn) {
+  document.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Auto-start from splash
+window.onload = () => {
+  navigate('splash');
+};
+</script>
+</body>
+</html>
